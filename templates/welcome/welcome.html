@@ -1,0 +1,28 @@
+{{define "welcome"}}
+<html>
+  <head>
+    <title>Welcome - Hummingbard</title>
+    {{template "common-head" .}}
+  </head>
+  <body>
+    <div class="root">
+      {{template "header" Map "Page" . "Name" "index-user"}}
+
+      <div class="center-content welcome">
+          <div class="lds-ring gr-center"><div></div><div></div><div></div><div></div></div>
+      </div>
+
+          <script nonce={{.Nonce}}>
+            let homeserverURL = {{.HomeServerURL}}
+            window.state = {
+              rooms: {{.Rooms}},
+            }
+          </script>
+      {{template "state" .}}
+      {{template "footer" .}}
+      <script defer nonce={{.Nonce}} src="{{ InsertJS "welcome" }}"></script>
+
+    </div>
+  </body>
+</html>
+{{end}}

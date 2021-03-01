@@ -1,0 +1,18 @@
+{{define "children"}}
+<div class="flex flex-column {{if .Nested}}chld{{end}}">
+  <div class="">
+    {{if .Page}}
+      <a href="/{{.Child.Path}}"><span class="primary">{{.Child.Alias}}</span></a>
+    {{else}}
+      <a href="/{{.Child.Path}}"><span class="focusable primary hov-un" data-room-id={{.Child.RoomID}}>{{.Child.Alias}}</span></a>
+    {{end}}
+  </div>
+</div>
+<div class="flex flex-column {{if .Nested}}chld{{end}}">
+  {{if .Child.Children}}
+    {{range .Child.Children}}
+      {{template "children" Map "Child" . "Nested" true}}
+    {{end}}
+  {{end}}
+</div>
+{{end}}

@@ -1,0 +1,73 @@
+{{define "timeline-sidebar"}}
+  <div class="sidebar mt3 flex flex-column lh-copy">
+    <div class="fs-09">
+      <span class=""><strong>{{.Room.Name}}</strong></span>
+    </div>
+    <div class="mt3 fs-09">
+      {{.Room.Topic}}
+    </div>
+    {{if or .IsAdmin .IsOwner}}
+    <div class="mt3 tr">
+      <div class="load-room-settings flex">
+        <div class="">
+          <button>{{if .IsUserProfile}}Edit Profile{{else}}Settings{{end}}</button>
+        </div>
+      </div>
+    </div>
+    {{end}}
+
+
+    {{if .Room.Children}}
+      <div class="mt4 ">
+        <div class="mb2">
+          <span class="small bold">Sub-Spaces</span>
+        </div>
+        {{range .Room.Children}}
+          {{template "children" Map "Child" . "Nested" false}}
+        {{end}}
+      </div>
+    {{end}}
+
+    {{if .Room.Pages}}
+      <div class="mt4 ">
+        <div class="mb2">
+          <span class="small bold">Pages</span>
+        </div>
+        {{range .Room.Pages}}
+          {{template "children" Map "Child" . "Nested" false "Page" true}}
+        {{end}}
+      </div>
+    {{end}}
+
+      {{if gt .Room.Members 0}}
+      <div class="mt4 room-members" data-members={{.Room.Members}}>
+        <div class="fs-09 flex pointer">
+          <div class="flex-one">
+          <strong>{{.Room.Members}}</strong> {{if .IsUserProfile}}Follower{{else}}Member{{end}}{{if gt .Room.Members 1}}s{{end}}
+          </div>
+          {{if and .LoggedInUser .IsMember}}
+          <div class="gr-default o-60 hov-op">
+            <svg class="gr-center" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M12.78 6.22a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06 0L3.22 7.28a.75.75 0 011.06-1.06L8 9.94l3.72-3.72a.75.75 0 011.06 0z"></path></svg>
+          </div>
+        {{end}}
+      </div>
+      </div>
+      {{end}}
+    {{if and .LoggedInUser (.IsMember) (not .IsOwner) (not .IsUserProfile) (not .IsPermalink)}}
+      <div class="join-room mt3" 
+      data-type="{{if .IsUserProfile}}user{{else}}room{{end}}"
+      data-alias={{.Room.Alias}}
+      data-name={{.Room.Path}}
+      data-id="{{.Room.ID}}">
+        <button class="light">{{if .IsMember}}Leave{{else}}Join{{end}} {{.Room.Path}}</button>
+      </div>
+    {{end}}
+    <div class="mt4 bor-btm"></div>
+    <div class="mt4 small flex flex-column">
+      <span class="">Created on {{.Room.CreatedAt}}</span>
+      <span class="mt2">By <a href="/{{.Room.Owner.UserID}}"><span class="primary">{{.Room.Owner.UserID}}</span></a></span>
+    </div>
+    <div class="mt3">
+    </div>
+  </div>
+{{end}}

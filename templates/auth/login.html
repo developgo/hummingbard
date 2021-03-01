@@ -1,0 +1,67 @@
+{{define "login"}}
+<html>
+  <head>
+    <title>Login - Hummingbard</title>
+    {{template "common-head" .}}
+  </head>
+  <body>
+    <div class="root">
+      {{template "header" Map "Page" . "Name" "login"}}
+
+      <div class="center-content login">
+        <div class="gr-center w-350px brd pa3">
+
+          <form class="flex flex-column" action="/login" 
+           ref="login"
+            method="POST" autocomplete="off">
+              <div class="flex flex-column">
+                {{if .LoginFederated}}
+                  <div class="mb3 fs-09 lh-copy">
+                    Log in with an existing <br/> matrix account.
+                  </div>
+                  {{end}}
+                  <input class="" type="text" autofocus="autofocus"
+                  value="{{.LoginUsername}}"
+                  name="username" placeholder="username">
+              </div>
+              <div class="mt3 flex flex-column">
+                  <input class="" type="password"
+                  name="password" minlength="8" placeholder="password">
+              </div>
+
+              <script nonce={{.Nonce}}>
+                let loginError = false;
+                let loginUsername = {{.LoginUsername}}
+                let loginFederated = {{.LoginFederated}}
+              </script>
+              {{if .LoginError}}
+              <script nonce={{.Nonce}}>
+                loginError = true;
+              </script>
+              <div class="mt3 warn">
+                Username or password wrong
+              </div>
+              {{end}}
+
+            <div class="mt3 flex">
+              <div class="">
+                <button class="dark-button-small no-sel" 
+                  type="submit" >
+                  Log In
+                </button>
+              </div>
+              <div class="flex-one">
+              </div>
+              <div class="gr-center">
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      {{template "state" .}}
+      <script defer nonce={{.Nonce}} src="{{ InsertJS "login" }}"></script>
+
+    </div>
+  </body>
+</html>
+{{end}}

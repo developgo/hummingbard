@@ -1,0 +1,27 @@
+{{define "not-found"}}
+<html>
+  <head>
+    <title>Not Found - Hummingbard</title>
+    {{template "common-head" .}}
+  </head>
+  <body>
+    <div class="root">
+      {{template "header" Map "Page" . "Name" "error"}}
+
+      <div class="center-content ">
+        <div class="gr-center flex flex-column">
+          <div class="f1">
+            <strong>404</strong>
+          </div>
+          <div class="mt3 ">
+            Not found.
+          </div>
+        </div>
+      </div>
+      {{template "state" .}}
+      {{template "footer" .}}
+
+    </div>
+  </body>
+</html>
+{{end}}

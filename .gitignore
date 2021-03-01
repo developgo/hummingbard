@@ -1,0 +1,6 @@
+bin/*
+config.toml
+bigrooms.json
+static/js
+static/css
+ui/js/node_modules

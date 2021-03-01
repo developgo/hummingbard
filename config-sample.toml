@@ -1,0 +1,31 @@
+name = "hummingbard"
+mode = "development"
+youtube_key ="your-youtube-api-key"
+
+[client]
+domain = "hummingbard.com"
+port = 8999
+cookie_name = "hummingbard"
+secure_cookie = "something_random"
+
+[matrix]
+server = "localhost.com"
+port = 8008
+password = "CaR6hxVWKBzYn"
+anonymous_password = "blahblah"
+
+[db]
+user = "hummingbard"
+password = "hummingbard"
+name = "hummingbard"
+host = "localhost"
+port = "5432"
+ssl = "require"
+
+[redis]
+address = "localhost:6379"
+password = "redis"
+db = 1
+
+[spaces]
+prefix = "org.matrix.msc1772.space"

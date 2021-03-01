@@ -1,0 +1,16 @@
+{{define "common-head"}}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script defer nonce={{.Nonce}} src="{{ InsertJS "default" }}"></script>
+  <script defer nonce={{.Nonce}} src="{{ InsertJS "nav" }}"></script>
+  <link rel="stylesheet" href="{{ InsertCSS "tachyons" }}" as="style">
+  <link rel="stylesheet" href="{{ InsertCSS "microtip" }}" as="style">
+  <link rel="stylesheet" href="{{ InsertCSS "index" }}" as="style">
+  <link rel="stylesheet" href="{{ InsertCSS "tippy" }}" as="style">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/favico/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favico/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/favico/favicon-16x16.png">
+  <link rel="mask-icon" href="/static/favico/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+{{end}}

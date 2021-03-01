@@ -1,0 +1,70 @@
+{{define "signup"}}
+<html>
+  <head>
+    <title>Sign Up - Hummingbard</title>
+    {{template "common-head" .}}
+  </head>
+  <body>
+    <div class="root">
+      {{template "header" Map "Page" . "Name" "signup"}}
+
+      <div class="center-content signup">
+        <div class="gr-center w-350px brd pa3">
+        <div class="">
+          <form class="flex flex-column" action="/signup"
+            method="POST" autocomplete="off">
+              <div class="flex flex-column">
+                  <input class="" type="text" autofocus="autofocus"
+                  minlength="3"
+                  name="username" placeholder="username">
+              </div>
+              <div class="mt3 flex flex-column">
+                  <input class="" type="password"
+                  name="password" minlength="8" placeholder="password">
+              </div>
+              <div class="mt3 flex flex-column">
+                  <input class="" type="password"
+                  name="repeat" minlength="8" placeholder="repeat password">
+              </div>
+              {{if .UserExists}}
+              <div class="">
+                That username is already taken.
+              </div>
+              {{end}}
+              {{if .ServerDown}}
+              <div class="">
+                Account could not be created.
+              </div>
+              {{end}}
+
+              <script nonce={{.Nonce}}>
+                let signupError = false;
+              </script>
+              {{if .SignupError}}
+              <script nonce={{.Nonce}}>
+                signupError = true;
+              </script>
+              {{end}}
+              {{if .Interactive}}
+              <script nonce={{.Nonce}}>
+                window.interactive = true;
+                window.homeServer = {{.HomeServer}};
+              </script>
+              {{end}}
+            <div class="mt3">
+              <button class="dark-button-small no-sel" 
+                type="submit" >
+                Sign Up
+              </button>
+            </div>
+          </form>
+        </div>
+        </div>
+      </div>
+      {{template "state" .}}
+      <script defer nonce={{.Nonce}} src="{{ InsertJS "signup" }}"></script>
+
+    </div>
+  </body>
+</html>
+{{end}}

@@ -1,0 +1,172 @@
+{{define "gallery"}}
+<html>
+  <head>
+    <title>Hummingbard</title>
+    {{template "common-head" .}}
+  </head>
+  <body>
+    <div class="base {{if .LoggedInUser}}base-l{{end}}">
+      {{if .LoggedInUser}}
+      {{template "nav" Map "Page" .}}
+      {{end}}
+      <div class="root">
+        {{template "header" Map "Page" . "Name" "gallery" "FullHeader" true}}
+
+        <div class="content-g ">
+          <div class="g-con">
+            <div class="g-meta pa3 flex">
+
+              <div class="mr3">
+                {{if gt (len .Room.Avatar) 0}}
+                {{$hms := .HomeServerURL}}
+                {{$mxc := .Room.Avatar}}
+                <div class="thumbnail">
+                  <img height="30" width="30" loading="lazy" src="{{.Room.Avatar}}"/>
+                </div>
+                {{else}}
+                <div class="gr-center">
+                   <svg class="gr-center" height="30" width="30">
+                     <circle cx="15" cy="15" r="15" stroke-width="0" fill="black" />
+                   </svg>
+                </div>
+                {{end}}
+              </div>
+
+
+              <div class="gr-center small">
+                {{$path := .Room.Path}}
+                {{$ln := len .Room.PathItems}}
+                {{$sin := eq (len .Room.PathItems) 1 }}
+                {{range $id, $val := .Room.PathItems}}
+                {{$last := IsLastItem $id $ln}}
+                {{$mtc := or (eq $val.Path $path) ($sin)}}
+                <span class=""><a href="/{{$val.Path}}"><span class="{{if $mtc}}bold{{end}}">{{$val.Item}}</span></a>
+                  {{if not $last}} / {{end}}
+                </span>
+                {{end}}
+              </div>
+              <div class="flex-one"></div>
+            {{if or .IsAdmin .IsOwner}}
+              <div class="room-settings flex">
+              </div>
+            {{end}}
+              {{if and .IsMember (not .IsPermalink) (not .IsPage)}}
+                <div class="">
+                {{if .LoggedInUser}}
+                  <div class="new-gallery-post">
+                    <button>Add Image</button>
+                  </div>
+                {{else}}
+                  <div class="new-gallery-post">
+                    <button>Log In to Add Image</button>
+                  </div>
+                {{end}}
+                </div>
+              {{end}}
+
+              {{if and .LoggedInUser (not .IsPermalink) (.IsPage)}}
+                {{if or .IsOwner .IsMember}}
+                  <div class="gr-center">
+                    <div class="edit-page">
+                      <button>Edit Page</button>
+                    </div>
+                  </div>
+                {{end}}
+              {{end}}
+
+              {{if and .LoggedInUser (not .IsMember)}}
+                <div class="join-room mt3" 
+                data-type="{{if .IsUserProfile}}user{{else}}room{{end}}"
+                data-alias={{.Room.Alias}}
+                data-name={{.Room.Path}}
+                data-id="{{.Room.ID}}">
+                  <button class="">{{if .IsUserProfile}}Follow{{else}}Join{{end}} {{.Room.Path}}</button>
+                </div>
+              {{end}}
+            </div>
+
+
+            {{$hms := .HomeServerURL}}
+
+
+
+
+          {{if not .IsPage}}
+
+            <div class="gallery">
+              <div class="gr-default h-100">
+                <div class="lds-ring gr-center"><div></div><div></div><div></div><div></div></div>
+              </div>
+            </div>
+          {{else}}
+          <div class="flex flex-column ma3">
+
+            <div class="">
+              <span class="f4 bold">{{Title .Room.Name}}</span>
+            </div>
+
+            <div class="mt4 lh-copy page">
+                {{$rid := .Room.ID}}
+                {{$rpth := .Room.Path}}
+                {{$liu := .LoggedInUser}}
+                {{range $idx, $post := .Posts}}
+                  {{if and (eq $post.Type "com.hummingbard.post") (eq $idx 0) (not $post.Redacted)}}
+                    <div class="flex flex-column">
+
+                      <div class="">
+                        {{$con := index $post.Content "bodyHTML"}}
+                        {{$con}}
+                      </div>
+
+                      <div class="mt5">
+                        <span class="small">Last Edited: {{$post.Date}}</span>
+                      </div>
+
+                    </div>
+                  {{end}}
+                {{end}}
+            </div>
+
+            <div class="">
+            </div>
+
+          </div>
+          {{end}}
+
+
+            <script nonce={{.Nonce}}>
+              window.timeline = {
+                room_id: {{.Room.ID}},
+                permalink: {{.IsPermalink}},
+                {{if .IsPermalink}}
+                event_id: {{.Room.EventID}},
+                thread_in_room_id: {{.Room.ThreadInRoomID}},
+                {{end}}
+                alias: {{.Room.Alias}},
+                profile: {{.IsUserProfile}},
+                initialPosts: JSON.parse({{.InitialPosts}}),
+                end: {{.LastEvent}},
+                owner: {{.IsOwner}},
+                admin: {{.IsAdmin}},
+                member: {{.IsMember}},
+                state: {{.Room.State}},
+                room_type: {{.Room.Type}},
+                room_path: {{.Room.Path}},
+                children: {{.Room.Children}},
+                pages: {{.Room.Pages}},
+              }
+              let homeserverURL = {{.HomeServerURL}}
+            </script>
+          </div>
+          {{template "timeline-sidebar" .}}
+
+
+        </div>
+        {{template "state" .}}
+        <script defer nonce={{.Nonce}} src="{{ InsertJS "timeline" }}"></script>
+
+      </div>
+    </div>
+  </body>
+</html>
+{{end}}

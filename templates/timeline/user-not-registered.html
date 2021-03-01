@@ -1,0 +1,51 @@
+{{define "user-not-registered"}}
+<html>
+  <head>
+    <title>Hummingbard</title>
+    {{template "common-head" .}}
+  </head>
+  <body>
+    <div class="root">
+      {{template "header" Map "Page" . "Name" "user-not-registered"}}
+
+      <div class="content-c mt4">
+        <div class="con gr-center">
+          <div class="flex flex-column mb4 flex brd pa3 lh-copy tc" style="max-width: 350px;">
+            {{if .User.AvatarURL}}
+              {{if gt (len .User.AvatarURL) 0}}
+                <div class="avatar mb3">
+                  <img src={{.User.AvatarURL}} />
+                </div>
+              {{end}}
+            {{else}}
+                <div class="avatar mb3">
+                   <svg class="gr-center" height="80" width="80">
+                     <circle cx="40" cy="40" r="40" stroke-width="0" fill="black" />
+                   </svg>
+                </div>
+            {{end}}
+            <div class="flex flex-column">
+              {{if .User.DisplayName}}
+                {{if gt (len .User.DisplayName) 0}}
+                  <span class="f4 bold">{{.User.DisplayName}}</span>
+                  <span class="fs-09 0-90">{{.User.UserID}}</span>
+                {{end}}
+              {{else}}
+                <span class="f5 bold">{{.User.UserID}}</span>
+              {{end}}
+            </div>
+            <div class="mt4">
+              This user exists on the <span class="primary">{{.User.ServerName}}</span> server, but does not have a hummingbard account.
+            </div>
+          </div>
+        </div>
+
+      </div>
+      {{template "state" .}}
+      {{template "footer" .}}
+      <script defer nonce={{.Nonce}} src="{{ InsertJS "timeline" }}"></script>
+
+    </div>
+  </body>
+</html>
+{{end}}

@@ -1,0 +1,413 @@
+{{define "timeline"}}
+<html>
+  <head>
+    <title>{{.Room.Name}} - Hummingbard</title>
+    <meta name="description" content="{{.Room.Topic}}">
+    {{template "common-head" .}}
+
+{{if gt (len .Room.CSS) 0}}
+<style nonce="{{.Nonce}}" type="text/css">
+{{.Room.CSS}}
+</style>
+{{end}}
+
+  </head>
+  <body>
+    <div class="base {{if .LoggedInUser}}base-l{{end}}">
+      {{if .LoggedInUser}}
+      {{template "nav" Map "Page" .}}
+      {{end}}
+      <div class="root">
+        {{template "header" Map "Page" . "Name" "timeline"}}
+
+        <div class="content{{if .IsUserProfile}}-c{{else}} brd-r{{end}}">
+          <div class="con brd-lr">
+
+            {{if and .IsUserProfile (not .IsPermalink)}}
+
+            {{$hd := gt (len .Room.Header) 0}}
+
+              <div class="">
+                {{if $hd}}
+                <div class="room-header-alt bg-img" style="background-image:url({{.Room.Header}});">
+                </div>
+                {{end}}
+
+
+                <div class="room-meta{{if $hd}} room-meta-alt{{end}} brd-btm flex flex-column">
+
+                  <div class="flex relative">
+                    {{if gt (len .Room.Avatar) 0}}
+                      <a href="{{.Room.Avatar}}">
+                        <div class="room-avatar {{if $hd}}absolute{{else}}mb3{{end}} bg-img {{if $hd}}avbrd{{end}}" 
+                        style="background-image:url({{.Room.Avatar}});">
+                        </div>
+                      </a>
+                    {{end}}
+                    <div class="flex-one">
+                    </div>
+                    <div class="">
+                      {{if .IsOwner}}
+                        <div class="load-room-settings flex">
+                          <div class="">
+                            <button class="light">Edit Profile</button>
+                          </div>
+                        </div>
+                      {{end}}
+                    </div>
+
+              {{if and .LoggedInUser (.IsUserProfile) (not .IsOwner)}}
+                    <div class="join-room" 
+                    data-type="{{if .IsUserProfile}}user{{else}}room{{end}}"
+                    data-alias={{.Room.Alias}}
+                    data-name={{.Room.Path}}
+                    data-id="{{.Room.ID}}">
+                      <button class="{{if .IsMember}}light{{end}}">{{if .IsMember}}Unfollow{{else}}Follow{{end}} {{.Room.Path}}</button>
+                    </div>
+              {{end}}
+
+
+                  </div>
+
+                  {{$nm := .Room.Path}}
+                  {{if gt (len .Room.Name) 0}}{{$nm = .Room.Name}}{{end}}
+                  <div class="mt1">
+                    <strong>{{$nm}}</strong>
+                  </div>
+                  {{if gt (len .Room.Name) 0}}
+                  <div class="mt1 small primary">
+                    {{.Room.Path}}
+                  </div>
+                  {{end}}
+
+                  <div class="room-topic mt3 fs-09 lh-copy">
+                    {{.Room.Topic}}
+                  </div>
+
+                  <div class="mt4 flex">
+                    <div class="o-80 fs-09">
+                      Joined on {{.Room.CreatedAt}}
+                    </div>
+                  </div>
+
+
+                </div>
+              </div>
+            {{end}}
+
+            {{if and (not .IsUserProfile) (gt (len .Room.Header) 0)}}
+            <div class="">
+              <div class="room-header bg-img" style="background-image:url({{.Room.Header}});">
+              </div>
+            </div>
+            {{end}}
+
+            <div class="pt3 pb3 ph3 brd-btm flex" style="min-height: 60px;">
+
+              {{if not .IsUserProfile}}
+              <div class="mr3">
+                {{if gt (len .Room.Avatar) 0}}
+                {{$hms := .HomeServerURL}}
+                {{$mxc := .Room.Avatar}}
+                <div class="thumbnail">
+                  <img height="30" width="30" loading="lazy" src="{{.Room.Avatar}}"/>
+                </div>
+                {{else}}
+                <div class="gr-center">
+                   <svg class="gr-center" height="30" width="30">
+                     <circle cx="15" cy="15" r="15" stroke-width="0" fill="black" />
+                   </svg>
+                </div>
+                {{end}}
+              </div>
+
+
+              <div class="gr-center small">
+                {{$path := .Room.Path}}
+                {{$ln := len .Room.PathItems}}
+                {{$sin := eq (len .Room.PathItems) 1 }}
+                {{$prm := .IsPermalink}}
+                {{range $id, $val := .Room.PathItems}}
+                {{$last := IsLastItem $id $ln}}
+                {{$mtc := or (eq $val.Path $path) ($sin)}}
+                {{if and $prm $last}}{{$mtc = true}}{{end}}
+                <span class=""><a href="/{{$val.Path}}"><span class="{{if $mtc}}bold{{end}}">{{$val.Item}}</span></a>
+                  {{if not $last}} / {{end}}
+                </span>
+                {{end}}
+              </div>
+              {{else}}
+
+
+                {{if and .IsUserProfile .IsPermalink}}
+
+                  <div class="gr-center flex">
+                    <div class="">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M9.78 12.78a.75.75 0 01-1.06 0L4.47 8.53a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 1.06L6.06 8l3.72 3.72a.75.75 0 010 1.06z"></path></svg>
+                    </div>
+                    <div class="gr-center ml2 small">
+                      <a href="/{{index .PermalinkedPost.Content "room_path"}}">
+                        <span class="primary hov-un">Back To Profile<span>
+                      </a>
+                    </div>
+                  </div>
+
+                {{end}}
+
+              {{end}}
+
+              {{if and .IsUserProfile (not .IsPermalink)}}
+                {{if gt .Room.Members 0}}
+                <div class="gr-center fs-09">
+                  <strong>{{.Room.Members}}</strong> Follower{{if gt .Room.Members 1}}s{{end}}
+                </div>
+                {{end}}
+              {{end}}
+
+
+              <div class="flex-one"></div>
+              {{if and .LoggedInUser (not .IsPermalink) (not .IsPage)}}
+                {{if or (and .IsUserProfile .IsOwner) (and (not .IsUserProfile) (or .IsOwner .IsMember))}}
+                  <div class="gr-center">
+                    <div class="new-post">
+                      <button>New Post</button>
+                    </div>
+                  </div>
+                {{end}}
+                  <div class="share-post"></div>
+              {{end}}
+              {{if and (not .LoggedInUser) (not .IsPermalink) (not .IsReplyPermalink)}}
+                  <div class="gr-center">
+                    <div class="new-post">
+                      <a href="/login">
+                      <button>Log in to Post</button>
+                      </a>
+                    </div>
+                  </div>
+              {{end}}
+
+    {{if and .LoggedInUser (not .IsMember) (not .IsOwner) (not .IsUserProfile) (not .IsPermalink)}}
+      <div class="join-room" 
+      data-type="{{if .IsUserProfile}}user{{else}}room{{end}}"
+      data-alias={{.Room.Alias}}
+      data-name={{.Room.Path}}
+      data-id="{{.Room.ID}}">
+        <button class="light">{{if .IsMember}}Leave{{else}}Join{{end}} {{.Room.Path}}</button>
+      </div>
+    {{end}}
+
+              {{if and .LoggedInUser (not .IsPermalink) (.IsPage)}}
+                {{if or .IsOwner .IsMember}}
+                  <div class="gr-center">
+                    <div class="edit-page">
+                      <button>Edit Page</button>
+                    </div>
+                  </div>
+                {{end}}
+              {{end}}
+
+            </div>
+
+            {{if or .IsAdmin .IsOwner}}
+              <div class="room-settings flex">
+              </div>
+            {{end}}
+
+            {{$hms := .HomeServerURL}}
+
+
+
+
+
+          {{if not .IsPage}}
+
+
+            {{if .IsPermalink}}
+
+
+              {{if .PermalinkedPost}}
+                  {{$rpth := .Room.Path}}
+                  {{$rid := .Room.ID}}
+                  {{$liu := .LoggedInUser}}
+                <div class="permalinked-post">
+                  {{template "timeline-event" Map "Event" .PermalinkedPost "HomeServerURL" $hms "PermalinkedPost" true "RoomPath" $rpth "LoggedInUser" $liu "RoomID" $rid "Focus" true}}
+                <div class="flex pa3 brd-btm" style="min-height: 60px;">
+                  <div class="sort-replies">
+                    <select class="small">
+                      <option>Oldest</option>
+                      <option {{if eq .Sort "recent"}}selected{{end}}>Recent</option>
+                      <option {{if eq .Sort "replies"}}selected{{end}}>Most Replies</option>
+                    </select>
+                  </div>
+                  <div class="flex-one"></div>
+                  {{if .LoggedInUser}}
+                    {{if or .IsMember .IsOwner}}
+                      <div class="new-post">
+                        <button>Reply</button>
+                      </div>
+                    {{end}}
+                  {{else}}
+                  <div class="new-post">
+                    <a href="/">
+                    <button>Log in to Reply</button>
+                    </a>
+                  </div>
+                  {{end}}
+                  <div class="share-post"></div>
+                </div>
+              {{end}}
+                </div>
+
+              {{end}}
+
+
+
+
+              {{if and .LoggedInUser }}
+                  <div class="create-post"></div>
+              {{end}}
+
+              <div class="added-posts"></div>
+
+              <div class="posts">
+                {{if .IsReplyPermalink}}
+                  <div class="brd-btm pa3 small flex">
+                    <div class="">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M9.78 12.78a.75.75 0 01-1.06 0L4.47 8.53a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 1.06L6.06 8l3.72 3.72a.75.75 0 010 1.06z"></path></svg>
+                    </div>
+                    <div class="gr-center ml2">
+                      <a href="/{{.RootEvent}}">
+                        <span class="primary hov-un">View All Replies<span>
+                      </a>
+                    </div>
+                  </div>
+                {{end}}
+
+
+                {{$rpth := .Room.Path}}
+                {{$rid := .Room.ID}}
+                {{$liu := .LoggedInUser}}
+
+
+
+                {{if .IsPermalink}}
+
+                <div class="replies gr-default mb5">
+                  <div class="lds-ring gr-center pv4"><div></div><div></div><div></div><div></div></div>
+                </div>
+
+
+            {{else}}
+                  {{$rpth := .Room.Path}}
+                  {{$rid := .Room.ID}}
+                  {{$liu := .LoggedInUser}}
+                  {{range $idx, $post := .Posts}}
+                    {{if and  (not $post.Redacted)}}
+                      {{template "timeline-event" Map "Event" $post "HomeServerURL" $hms "RoomPath" $rpth "LoggedInUser" $liu "RoomID" $rid}}
+                    {{end}}
+                {{end}}
+
+                {{end}}
+
+
+              </div>
+
+
+
+
+
+          {{else}}
+
+          <div class="flex flex-column ma3">
+
+            <div class="">
+              <span class="f4 bold">{{Title .Room.Name}}</span>
+            </div>
+
+            <div class="mt4 lh-copy page">
+                {{$rid := .Room.ID}}
+                {{$rpth := .Room.Path}}
+                {{$liu := .LoggedInUser}}
+                {{range $idx, $post := .Posts}}
+                  {{if and (eq $post.Type "com.hummingbard.post") (eq $idx 0) (not $post.Redacted)}}
+                    <div class="flex flex-column">
+
+                      <div class="">
+                        {{$con := index $post.Content "bodyHTML"}}
+                        {{$con}}
+                      </div>
+
+                      <div class="mt5">
+                        <span class="small">Last Edited: {{$post.Date}}</span>
+                      </div>
+
+                    </div>
+                  {{end}}
+                {{end}}
+            </div>
+
+            <div class="">
+            </div>
+
+          </div>
+
+
+          {{end}}
+
+
+
+
+            {{if and (not .IsPermalink) (not .IsPage)}}
+              <div class="more-posts flex flex-column ">
+                <div class="more-post-items">
+                </div>
+                  <div class="load-more">
+                  </div>
+              </div>
+            {{end}}
+
+            <div class="timeline">
+            </div>
+
+            <script nonce={{.Nonce}}>
+              window.timeline = {
+                room_id: {{.Room.ID}},
+                permalink: {{.IsPermalink}},
+                replyPermalink: {{.IsReplyPermalink}},
+                {{if .IsPermalink}}
+                event_id: {{.Room.EventID}},
+                thread_in_room_id: {{.Room.ThreadInRoomID}},
+                permalinkedPost: {{.PermalinkedPost}},
+                replies: {{.Posts}},
+                root_event: {{.RootEvent}},
+                {{end}}
+                alias: {{.Room.Alias}},
+                profile: {{.IsUserProfile}},
+                initialPosts: JSON.parse({{.InitialPosts}}),
+                end: {{.LastEvent}},
+                owner: {{.IsOwner}},
+                admin: {{.IsAdmin}},
+                member: {{.IsMember}},
+                state: {{.Room.State}},
+                room_type: {{.Room.Type}},
+                room_path: {{.Room.Path}},
+                children: {{.Room.Children}},
+                pages: {{.Room.Pages}},
+              }
+              let homeserverURL = {{.HomeServerURL}}
+            </script>
+          </div>
+
+          {{if not .IsUserProfile}}
+          {{template "timeline-sidebar" .}}
+          {{end}}
+
+        </div>
+        {{template "state" .}}
+        <script defer nonce={{.Nonce}} src="{{ InsertJS "timeline" }}"></script>
+
+      </div>
+    </div>
+  </body>
+</html>
+{{end}}

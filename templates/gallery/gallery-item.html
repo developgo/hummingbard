@@ -1,0 +1,179 @@
+{{define "gallery-item"}}
+<html>
+  <head>
+    <title>Hummingbard</title>
+    {{template "common-head" .}}
+  </head>
+  <body>
+    <div class="base {{if .LoggedInUser}}base-l{{end}}">
+      {{if .LoggedInUser}}
+      {{template "nav" Map "Page" .}}
+      {{end}}
+      <div class="root">
+        {{template "header" Map "Page" . "Name" "timeline"}}
+
+        <div class="content-g ">
+          <div class="g-con">
+            <div class="flex pa3 brd-btm">
+
+              <div class="mr3">
+                {{if gt (len .Room.Avatar) 0}}
+                {{$hms := .HomeServerURL}}
+                {{$mxc := .Room.Avatar}}
+                <div class="thumbnail">
+                  <img height="30" width="30" loading="lazy" src="{{.Room.Avatar}}"/>
+                </div>
+                {{else}}
+                <div class="gr-center">
+                   <svg class="gr-center" height="30" width="30">
+                     <circle cx="15" cy="15" r="15" stroke-width="0" fill="black" />
+                   </svg>
+                </div>
+                {{end}}
+              </div>
+
+
+              <div class="gr-center small">
+                {{$path := .Room.Path}}
+                {{$ln := len .Room.PathItems}}
+                {{$sin := eq (len .Room.PathItems) 1 }}
+                {{range $id, $val := .Room.PathItems}}
+                {{$last := IsLastItem $id $ln}}
+                {{$mtc := or (eq $val.Path $path) ($sin)}}
+                <span class=""><a href="/{{$val.Path}}"><span class="{{if $mtc}}bold{{end}}">{{$val.Item}}</span></a>
+                  {{if not $last}} / {{end}}
+                </span>
+                {{end}}
+              </div>
+              <div class="flex-one"></div>
+              {{if and .LoggedInUser (not .IsPermalink)}}
+              {{if or (and .IsUserProfile .IsOwner) (and (not .IsUserProfile) (or .IsOwner .IsMember))}}
+                  <div class="gr-center">
+                    <div class="new-post">
+                      <button>New Post</button>
+                    </div>
+                  </div>
+                  <div class="share-post"></div>
+                {{end}}
+              {{end}}
+            </div>
+
+            {{if or .IsAdmin .IsOwner}}
+              <div class="room-settings flex">
+              </div>
+            {{end}}
+
+            {{$hms := .HomeServerURL}}
+
+            {{if .IsPermalink}}
+
+              {{$ppost := .PermalinkedPost}}
+                {{$rpth := .Room.Path}}
+                {{$liu := .LoggedInUser}}
+              <div class="permalinked-post">
+                {{template "timeline-event" Map "Event" $ppost "HomeServerURL" $hms "PermalinkedPost" true "RoomPath" $rpth "LoggedInUser" $liu "Gallery" true}}
+              </div>
+
+              {{if and .LoggedInUser}}
+                  <div class="flex pa3 brd-btm" style="min-height: 60px;">
+                    <div class="sort-replies">
+                      <select class="small">
+                        <option>Oldest</option>
+                        <option {{if eq .Sort "recent"}}selected{{end}}>Recent</option>
+                        <option {{if eq .Sort "replies"}}selected{{end}}>Most Replies</option>
+                      </select>
+                    </div>
+                  <div class="flex-one"></div>
+                  <div class="new-post">
+                    <button>Reply</button>
+                  </div>
+                  <div class="share-post"></div>
+                </div>
+              {{end}}
+
+              {{if and .LoggedInUser }}
+                  <div class="create-post"></div>
+              {{end}}
+
+              <div class="added-posts "></div>
+
+              <div class="posts">
+                {{if .IsReplyPermalink}}
+                  <a href="/{{.RootEvent}}">
+                  <div class="mb4 small flex">
+                    <div class="">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M7.78 12.53a.75.75 0 01-1.06 0L2.47 8.28a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 1.06L4.81 7h7.44a.75.75 0 010 1.5H4.81l2.97 2.97a.75.75 0 010 1.06z"></path></svg>
+                    </div>
+                    <div class="gr-center ml2"><u>See All Replies</u></div>
+                  </div>
+                  </a>
+                {{end}}
+                {{if .Posts}}
+                <div class="replies gr-default ">
+                  <div class="lds-ring gr-center"><div></div><div></div><div></div><div></div></div>
+                </div>
+
+
+                {{else}}
+                <div class="tc pv5 small bold no-replies">
+                  No Replies
+                </div>
+                {{end}}
+
+              </div>
+
+
+            {{end}}
+
+
+
+            {{if and .Posts (not .IsPermalink)}}
+              <div class="more-posts flex flex-column">
+                <div class="more-post-items">
+                </div>
+                  <div class="load-more">
+                    <button class="button">Load More</button>
+                  </div>
+              </div>
+            {{end}}
+
+            <div class="timeline">
+            </div>
+
+            <script nonce={{.Nonce}}>
+              window.timeline = {
+                room_id: {{.Room.ID}},
+                permalink: {{.IsPermalink}},
+                {{if .IsPermalink}}
+                event_id: {{.Room.EventID}},
+                thread_in_room_id: {{.Room.ThreadInRoomID}},
+                permalinkedPost: {{.PermalinkedPost}},
+                replies: {{.Posts}},
+                root_event: {{.RootEvent}},
+                {{end}}
+                alias: {{.Room.Alias}},
+                profile: {{.IsUserProfile}},
+                initialPosts: JSON.parse({{.InitialPosts}}),
+                end: {{.LastEvent}},
+                owner: {{.IsOwner}},
+                admin: {{.IsAdmin}},
+                member: {{.IsMember}},
+                state: {{.Room.State}},
+                room_type: {{.Room.Type}},
+                room_path: {{.Room.Path}}
+              }
+              let homeserverURL = {{.HomeServerURL}}
+            </script>
+          </div>
+          {{template "timeline-sidebar" .}}
+
+
+        </div>
+        {{template "state" .}}
+        <script defer nonce={{.Nonce}} src="{{ InsertJS "timeline" }}"></script>
+
+      </div>
+    </div>
+  </body>
+</html>
+{{end}}

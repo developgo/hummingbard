@@ -1,0 +1,92 @@
+{{define "index-user"}}
+<html>
+  <head>
+    <title>Hummingbard</title>
+    {{template "common-head" .}}
+  </head>
+  <body>
+    <div class="base {{if .LoggedInUser}}base-l{{end}}">
+      {{if .LoggedInUser}}
+      {{template "nav" Map "Page" .}}
+      {{end}}
+      <div class="root">
+        {{template "header" Map "Page" . "Name" "index-user"}}
+
+        <div class="center-content">
+
+          {{if .Posts}}
+
+          <div class="brd-lr flex flex-column">
+            <div class=" pa3 brd-btm flex" style="min-height:60px;">
+              <div class="gr-center">
+                <span class="small bold">Your feed</span>
+              </div>
+              <div class="flex-one"></div>
+              <div class="gr-center">
+                  <div class="new-post">
+                    <button>New Post</button>
+                  </div>
+              </div>
+            </div>
+              <div class="share-post"></div>
+              {{if and .LoggedInUser }}
+                  <div class="create-post"></div>
+              {{end}}
+              <div class="added-posts"></div>
+            <div class="posts ">
+              {{$rpth := "index-user"}}
+              {{$liu := .LoggedInUser}}
+              {{$hms := .HomeServerURL}}
+              {{range $idx, $post := .Posts}}
+                {{if and (eq $post.Type "com.hummingbard.post") (not $post.Redacted)}}
+                  {{template "timeline-event" Map "Event" $post "HomeServerURL" $hms "RoomPath" $rpth "LoggedInUser" $liu "UserFeed" true}}
+                {{end}}
+              {{end}}
+            </div>
+              <div class="more-posts flex flex-column">
+                <div class="more-post-items">
+                </div>
+                  <div class="load-more">
+                  </div>
+              </div>
+            <div class="timeline">
+            </div>
+          </div>
+
+          {{else}}
+
+            <div class="gr-center flex flex-column">
+              <div class="">
+                Your feed looks a bit empty.
+              </div>
+              <div class="mt3 tc">
+                <button class="">Explore Spaces</button>
+              </div>
+            </div>
+
+
+          {{end}}
+
+        </div>
+            <script nonce={{.Nonce}}>
+              window.timeline = {
+                userFeed: {{true}},
+                feed: {{.FeedItems}},
+                permalink: {{false}},
+                room_path: {{.Room.Path}},
+                initialPosts: JSON.parse({{.InitialPosts}}),
+              }
+              let homeserverURL = {{.HomeServerURL}}
+              window.index = {
+                state: {{.State}},
+                posts: {{.Posts}}
+              }
+            </script>
+        {{template "state" .}}
+        <script defer nonce={{.Nonce}} src="{{ InsertJS "timeline" }}"></script>
+
+      </div>
+    </div>
+  </body>
+</html>
+{{end}}

@@ -1,0 +1,217 @@
+{{define "article"}}
+<html>
+  <head>
+    {{$post := .PermalinkedPost}}
+    {{$article := index $post.Content "com.hummingbard.article"}}
+    {{$description := index $article "description"}}
+    <title>{{index $article "title"}} - Hummingbard</title>
+    {{if $description}}
+    {{if gt (len $description) 0 }}
+      <meta name="description" content="{{$description}}">
+    {{end}}
+    {{end}}
+    {{template "common-head" .}}
+
+  <style>
+.article {
+  min-height: 100vh;
+  display: grid;
+}
+  </style>
+
+  </head>
+  <body>
+    <div class="article">
+
+      <div class="center-content mt4">
+        <div class="ph3">
+
+          {{$hms := .HomeServerURL}}
+
+          {{if .IsPermalink}}
+
+            {{$post := .PermalinkedPost}}
+              {{$rpth := .Room.Path}}
+              {{$liu := .LoggedInUser}}
+
+            <div class="article-post">
+              <div class="flex flex-column mb5">
+                  {{$article := index $post.Content "com.hummingbard.article"}}
+
+                <div class="lh-copy">
+                  <h1>{{index $article "title"}}</h1>
+                </div>
+
+                {{$author := index $post.Author}}
+                <div class="lh-copy">
+
+                  <div class="flex">
+                    <div class="gr-default mr3">
+                      <a class="gr-center" href="/{{$author.FormattedID}}" title="{{index $post.Sender}}">
+                      {{if gt (len $author.AvatarURL) 0}}
+                          <div class="thumbnail{{if .Nested}}-s{{end}}">
+                            <img src="{{$author.AvatarURL}}" />
+                          </div>
+                      {{else}}
+                               <svg class="gr-center" height="30" width="30">
+                                 <circle cx="15" cy="15" r="15" stroke-width="0" fill="black" />
+                               </svg>
+                      {{end}}
+                       </a>
+                    </div>
+                    <div class="flex flex-column flex-one">
+                      {{$us := $author.FormattedID}}
+                      {{if $author.DisplayName}}
+                      {{if gt (len $author.DisplayName) 0}}
+                        {{$us = $author.DisplayName}}
+                      {{end}}
+                      {{end}}
+                      <div class="small">
+                        <a class="relative" href="/{{$author.FormattedID}}">
+                            <span class="focusable" ><strong>{{$us}}</strong></span>
+                        </a>
+                      </div>
+                      <div class="small o-90">
+                        <span title={{index $post.Date}}>{{index $post.When}}</span>
+                      </div>
+                    </div>
+                </div>
+
+              {{$img := index $article "featured_image"}}
+
+              {{$mxc := ""}}
+              {{$ar := 0}}
+              {{if $img}}
+                {{$mxc = index $img "mxc"}}
+                {{$ar = index $img "aspect_ratio"}}
+              {{end}}
+
+              {{$ft := gt (len $mxc) 0}}
+
+              {{if $ft}}
+              <div class="fimg bg-img mt4" 
+                   style="padding-bottom:{{$ar}}%;">
+                <img src="{{$mxc}}" />
+              </div>
+              {{end}}
+
+
+                <div class="post-content mt4 lh-copy">
+                  {{index $post.Content "bodyHTML"}}
+                </div>
+
+              </div>
+            </div>
+
+              <div class="flex">
+                  <div class="sort-replies">
+                    <select class="small">
+                      <option>Oldest</option>
+                      <option>Recent</option>
+                      <option>Most Replies</option>
+                    </select>
+                  </div>
+                <div class="flex-one"></div>
+                {{if .LoggedInUser}}
+                  {{if .IsMember}}
+                    <div class="new-post">
+                      <button>Reply</button>
+                    </div>
+                  {{end}}
+                {{else}}
+                <a href="/login">
+                  <div class="post">
+                    <button>Log in to Reply</button>
+                  </div>
+                </a>
+                {{end}}
+                <div class="share-post"></div>
+              </div>
+
+            {{if and .LoggedInUser }}
+                <div class="create-post"></div>
+            {{end}}
+
+            <div class="added-posts mt4"></div>
+
+            <div class="posts">
+                {{if .IsReplyPermalink}}
+                  <div class="brd-btm pa3 small flex">
+                    <div class="">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M9.78 12.78a.75.75 0 01-1.06 0L4.47 8.53a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 1.06L6.06 8l3.72 3.72a.75.75 0 010 1.06z"></path></svg>
+                    </div>
+                    <div class="gr-center ml2">
+                      <a href="/{{.RootEvent}}">
+                        <span class="primary hov-un">View All Replies<span>
+                      </a>
+                    </div>
+                  </div>
+                {{end}}
+
+              {{$rpth := .Room.Path}}
+              {{$liu := .LoggedInUser}}
+
+              {{$depth := .Depth}}
+
+              <div class="replies gr-default brd mb5">
+                <div class="lds-ring gr-center"><div></div><div></div><div></div><div></div></div>
+              </div>
+
+
+
+            </div>
+
+          {{end}}
+
+
+
+          {{if and .Posts (not .IsPermalink)}}
+            <div class="more-posts flex flex-column">
+              <div class="more-post-items">
+              </div>
+                <div class="load-more">
+                  <button class="button">Load More</button>
+                </div>
+            </div>
+          {{end}}
+
+          <div class="timeline">
+          </div>
+
+          <script nonce={{.Nonce}}>
+            window.timeline = {
+              id: {{.Room.ID}},
+              permalink: {{.IsPermalink}},
+              {{if .IsPermalink}}
+              event_id: {{.Room.EventID}},
+              thread_in_room_id: {{.Room.ThreadInRoomID}},
+              permalinkedPost: {{.PermalinkedPost}},
+              replies: {{.Posts}},
+              root_event: {{.RootEvent}},
+              {{end}}
+              alias: {{.Room.Alias}},
+              profile: {{.IsUserProfile}},
+              initialPosts: JSON.parse({{.InitialPosts}}),
+              end: {{.LastEvent}},
+              owner: {{.IsOwner}},
+              admin: {{.IsAdmin}},
+              member: {{.IsMember}},
+              state: {{.Room.State}},
+              room_type: {{.Room.Type}},
+              room_path: {{.Room.Path}},
+              is_article: {{.IsArticle}}
+            }
+            let homeserverURL = {{.HomeServerURL}}
+          </script>
+        </div>
+
+
+      </div>
+      {{template "state" .}}
+
+      <script defer nonce={{.Nonce}} src="{{ InsertJS "timeline" }}"></script>
+
+    </div>
+  </body>
+</html>
+{{end}}

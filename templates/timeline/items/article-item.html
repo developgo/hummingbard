@@ -1,0 +1,63 @@
+{{define "article-item"}}
+<div class="mt3 flex flex-column{{if .Nested}} {{end}}"
+id="{{.Event.ShortID}}">
+
+{{$article := index .Event.Content "com.hummingbard.article"}}
+
+{{$img := index $article "featured_image"}}
+
+{{$mxc := ""}}
+{{if $img}}
+{{$mxc = index $img "mxc"}}
+{{end}}
+
+{{$ft := gt (len $mxc) 0}}
+
+<a href="/{{index .Event.Content "room_path"}}/{{index $article "slug"}}">
+
+<div class="flex flex-column lh-copy brd">
+
+
+  {{if $ft}}
+  <div class="featured-image bg-img" style="background-image:url({{$mxc}});">
+  </div>
+  {{end}}
+
+  <div class="pa3 flex flex-column {{if $ft}}pa3{{end}}">
+    <div class="">
+      <span class="f4 bold">{{index $article "title"}}</span>
+    </div>
+
+    {{$sub := index $article "subtitle"}}
+    {{if $sub}}
+      {{if gt (len $sub) 0}}
+      <div class="mt3">
+        {{$sub}}
+      </div>
+      {{end}}
+    {{end}}
+
+
+    {{$des := index $article "description"}}
+    {{if $des}}
+      {{if gt (len $des) 0}}
+      <div class="mt3">
+        {{$des}}
+      </div>
+      {{end}}
+    {{end}}
+
+
+
+
+
+
+  </div>
+
+</div>
+
+</div>
+</a>
+
+
+{{end}}

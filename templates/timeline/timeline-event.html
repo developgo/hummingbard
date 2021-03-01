@@ -1,0 +1,411 @@
+{{define "timeline-event"}}
+
+{{$reply := or .Reply .NestedReply}}
+
+
+
+{{$msgtype := index .Event.Content "msgtype"}}
+
+
+{{$l := false}}
+{{if .Depth}}{{if eq .Depth 1}}{{$l = true}}{{end}}{{end}}
+
+
+{{$evid := ""}}
+{{$id := index .Event.Content "event_id"}}
+{{if $id}}
+{{$evid = (index .Event.Content "event_id")}}
+{{$evid = (Concat "/" $evid)}}
+{{end}}
+{{$rpth := index .Event.Content "room_path"}}
+{{if and .RoomPath}}
+{{if eq $rpth .RoomPath}}
+{{$evid = (Concat "/" .Event.ID)}}
+{{end}}
+{{end}}
+
+
+
+{{$evid = Concat (index .Event.Content "room_path") $evid}}
+
+{{if .Nested}}
+    {{$evid = Concat (index .Event.Content "room_path") "/" (.Event.ID)}}
+    {{$rp := index .Event.Content "share_reply"}}
+    {{if $rp}}{{$evid = index .Event.Content "reply_permalink"}}{{end}}
+{{end}}
+
+{{$nsfw := index .Event.Content "nsfw"}}
+
+<div class="po-co flex flex-column{{if .Nested}} brd-tp brd-lr{{end}} {{if .NestedReply}}mt3 {{if $l}}ns-1{{end}}{{end}} {{if .Focus}}foc{{end}} {{if $nsfw}}relative{{end}}"
+id="{{.Event.ShortID}}">
+
+<div class="pi flex flex-column lh-copy {{if .Focus}}foc{{end}} ">
+
+
+    <div class="flex">
+      <div class="mr3">
+        <a href="/{{.Event.Author.FormattedID}}" title="{{.Sender}}">
+        {{if gt (len .Event.Author.AvatarURL) 0}}
+            <div class="thumbnail{{if .Nested}}-s{{end}}">
+              <img src="{{.Event.Author.AvatarURL}}" />
+            </div>
+        {{else}}
+            {{if or .Nested $reply}}
+                 <svg class="gr-center" height="22" width="22">
+                   <circle cx="11" cy="11" r="11" stroke-width="0" fill="black" />
+                 </svg>
+            {{else}}
+                 <svg class="gr-center" height="30" width="30">
+                   <circle cx="15" cy="15" r="15" stroke-width="0" fill="black" />
+                 </svg>
+            {{end}}
+        {{end}}
+         </a>
+      </div>
+      <div class="flex flex-column flex-one">
+        {{$us := .Event.Author.FormattedID}}
+        {{if gt (len .Event.Author.DisplayName) 0}}
+          {{$us = .Event.Author.DisplayName}}
+        {{end}}
+        <div class="small">
+          <a class="relative" href="/{{.Event.Author.FormattedID}}">
+              <span class="focusable" data-room-id={{.RoomID}}><strong>{{$us}}</strong></span>
+          </a>
+
+          {{if and .Event.IsArticle (not .Nested)}}
+          posted an article
+          {{end}}
+
+            {{$shtp := "a post"}}
+            {{if .Event.SharedPost}}
+             {{$rp := index .Event.SharedPost.Content "share_reply"}}
+             {{if $rp}}{{$shtp = "a reply"}}{{end}}
+             {{$art := index .Event.SharedPost.IsArticle}}
+             {{if $art}}{{$shtp = "an article"}}{{end}}
+             {{$dn := .Event.SharedPost.Author.DisplayName}}
+             shared {{$shtp}} by <a href="/@{{$dn}}"><span class="primary">@{{.Event.SharedPost.Author.DisplayName}}</span></a>
+            {{end}}
+
+
+            {{if and (not .PermalinkedPost) (not .Reply) (not .NestedReply)}}
+                {{$rpth := index .Event.Content "room_path"}}
+                {{if $rpth}}
+                    {{if gt (len $rpth) 0}}
+                        {{$showpath := and (ne $rpth .RoomPath) (not (IsUserProfile $rpth))}}
+                        {{if $showpath}}
+                            in <a href="/{{$rpth}}"><span class="primary">{{$rpth}}</span></a>
+                        {{end}}
+                    {{end}}
+                {{end}}
+            {{end}}
+
+            {{if $reply}}
+          <span title={{.Date}}>{{.Event.When}}</span>
+          {{end}}
+
+
+        </div>
+        {{if not $reply}}
+        <div class="small o-90">
+          <span title={{.Date}}>{{.Event.When}}</span>
+        </div>
+        {{end}}
+      </div>
+      <div class="post-tools flex">
+          {{if and .LoggedInUser (not .Event.SharedPost)}}
+              <div class="share  pointer"
+                data-id="{{.Event.ID}}">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M8 2.5a5.487 5.487 0 00-4.131 1.869l1.204 1.204A.25.25 0 014.896 6H1.25A.25.25 0 011 5.75V2.104a.25.25 0 01.427-.177l1.38 1.38A7.001 7.001 0 0114.95 7.16a.75.75 0 11-1.49.178A5.501 5.501 0 008 2.5zM1.705 8.005a.75.75 0 01.834.656 5.501 5.501 0 009.592 2.97l-1.204-1.204a.25.25 0 01.177-.427h3.646a.25.25 0 01.25.25v3.646a.25.25 0 01-.427.177l-1.38-1.38A7.001 7.001 0 011.05 8.84a.75.75 0 01.656-.834z"></path></svg>
+              </div>
+          {{end}}
+          {{if and (not .PermalinkedPost) (not .UserFeed)}}
+              <div class="perma-link pointer ml3">
+                  <a class="" href="/{{$evid}}">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M10.604 1h4.146a.25.25 0 01.25.25v4.146a.25.25 0 01-.427.177L13.03 4.03 9.28 7.78a.75.75 0 01-1.06-1.06l3.75-3.75-1.543-1.543A.25.25 0 0110.604 1zM3.75 2A1.75 1.75 0 002 3.75v8.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 12.25v-3.5a.75.75 0 00-1.5 0v3.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-8.5a.25.25 0 01.25-.25h3.5a.75.75 0 000-1.5h-3.5z"></path></svg>
+                  </a>
+              </div>
+          {{end}}
+          {{if .UserFeed}}
+              <div class="perma-link pointer ml3">
+                  <a class="" href="/{{index .Event.Content "room_path"}}/{{index .Event.ID}}">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M10.604 1h4.146a.25.25 0 01.25.25v4.146a.25.25 0 01-.427.177L13.03 4.03 9.28 7.78a.75.75 0 01-1.06-1.06l3.75-3.75-1.543-1.543A.25.25 0 0110.604 1zM3.75 2A1.75 1.75 0 002 3.75v8.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 12.25v-3.5a.75.75 0 00-1.5 0v3.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-8.5a.25.25 0 01.25-.25h3.5a.75.75 0 000-1.5h-3.5z"></path></svg>
+                  </a>
+              </div>
+          {{end}}
+          {{if and (.LoggedInUser) (not .Nested)}}
+          <div class="post-menu ml3" 
+                data-id="{{.Event.ID}}">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M12.78 6.22a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06 0L3.22 7.28a.75.75 0 011.06-1.06L8 9.94l3.72-3.72a.75.75 0 011.06 0z"></path></svg>
+          </div>
+          {{end}}
+      </div>
+    </div>
+
+    <div class="post-container{{if or .Nested $reply .PermalinkedPost}}-s{{end}}">
+
+      {{if eq $msgtype "m.text"}}
+
+        {{if not .Event.IsArticle}}
+
+
+          {{$bod := (index .Event.Content "body")}}
+          {{$body := (index .Event.Content "bodyHTML")}}
+          {{$long := and ( gt (len $bod) 666) (not .PermalinkedPost)}}
+          {{$pid := (RandomString 8)}}
+
+
+          <div class="post-content relative pt3 mb2 {{if .Nested}}fs-09{{end}} {{if $long}}long pb3{{end}}"
+          id="tl-{{$pid}}">
+            {{$body}}
+            {{if $long}}
+                <div class="gradient"
+                id="gr-{{$pid}}">
+                </div>
+                <div class="read-more"
+                data-id="{{$pid}}">
+                    <button class="small">Read More</button>
+                </div>
+            {{end}}
+            </div>
+        {{else}}
+
+            {{template "article-item" .}}
+
+        {{end}}
+
+
+        {{if not .Nested}}
+        {{if (index .Event.Content "shared_post")}}
+              {{$post :=  (index .Event.SharedPost)}}
+              {{$hms := .HomeServerURL}}
+              {{$rpth := .RoomPath}}
+              {{$liu := .LoggedInUser}}
+          {{template "timeline-event" Map "Event" $post "HomeServerURL" $hms "RoomPath" $rpth "LoggedInUser" $liu "Nested" true}}
+        {{end}}
+        {{end}}
+
+
+
+          {{$imgs := false}}
+          {{if index .Event.Content "images"}}
+
+            {{$imgs = true}}
+            {{$hms := .HomeServerURL}}
+            <div class="post-images">
+            {{range $idx, $image := index .Event.Content "images"}}
+
+              <div class="gr-center w-100">
+                <div class="pi-c"
+                  style="padding-bottom:{{$image.aspect_ratio}}%;">
+                  {{$mxc := index $image "mxc"}}
+                  <a href="{{$hms}}/_matrix/media/r0/download/{{$mxc}}">
+                    <img loading="lazy" src="{{$hms}}/_matrix/media/r0/download/{{$mxc}}"/>
+                  </a>
+                </div>
+              </div>
+
+            {{end}}
+            </div>
+          {{end}}
+
+
+
+          {{if index .Event.Content "links"}}
+          <div class="link-items {{if $imgs}}mt3{{end}}">
+              {{range $idx, $link := index .Event.Content "links"}}
+                {{if (index $link "is_youtube")}}
+                  {{template "youtube-item" .}}
+                {{else}}
+                  <div class="link-item pa3 flex flex-column fs-09">
+                    {{$title := index $link "title"}}
+                    {{$desc := index $link "description"}}
+                    <div class="">
+                      <a href="{{index $link "href"}}">
+                        <span class="primary">
+                        {{if $title}}
+                            {{if gt (len $title) 0}}
+                              {{index $link "title"}}
+                          {{end}}
+                        {{else}}
+                          {{index $link "href"}}
+                        {{end}}
+                        </span>
+                      </a>
+                    </div>
+                    {{if $title}}
+                        {{if gt (len $title) 0}}
+                        <div class="small o-90 mt2">
+                          {{index $link "href"}}
+                        </div>
+                        {{end}}
+                    {{end}}
+                  </div>
+                {{end}}
+              {{end}}
+            </div>
+          {{end}}
+
+
+          {{if index .Event.Content "attachments"}}
+          {{$ns := gt (len (index .Event.Content "attachments")) 0}}
+          <div class="attachment-items flex flex-column mb3 pa3">
+            {{$hms := .HomeServerURL}}
+            {{range $idx, $attachment := index .Event.Content "attachments"}}
+              {{$mxc := index $attachment "mxc"}}
+
+              <div class="attachment-item flex flex-column {{if $ns}}mb3{{end}}">
+                <div class="fs-09 flex-one">
+                  <a href="{{$hms}}/_matrix/media/r0/download/{{$mxc}}">
+                    <span class="primary">{{index $attachment "filename"}}</span>
+                  </a>
+                </div>
+                <div class="mt1 small o-90">
+                  {{$fs := (index $attachment "size")}}
+                  {{index $attachment "mimetype"}} - {{FileSize $fs}}
+                </div>
+              </div>
+            {{end}}
+          </div>
+          {{end}}
+
+      {{else if eq $msgtype "m.image"}}
+            {{$hms := .HomeServerURL}}
+            <div class="post-images mv2">
+
+              <div class="gr-center w-100">
+                  {{$mxc := StripMXCPrefix (index .Event.Content "url")}}
+                  {{$info := index .Event.Content "info"}}
+                  {{$height := index $info "h"}}
+                  {{$width := index $info "w"}}
+                <div class="pi-c relative"
+                     style="padding-bottom: calc(({{$height}}/{{$width}})*100%);">
+
+                  <a href="{{$hms}}/_matrix/media/r0/download/{{$mxc}}">
+                    <img loading="lazy" src="{{$hms}}/_matrix/media/r0/download/{{$mxc}}"/>
+                  </a>
+                </div>
+              </div>
+
+            </div>
+
+      {{else if eq $msgtype "m.file"}}
+
+          <div class="attachment-items flex flex-column mv2 pa3">
+            {{$hms := .HomeServerURL}}
+
+              {{$mxc := StripMXCPrefix (index .Event.Content "url")}}
+              {{$info := index .Event.Content "info"}}
+              {{$mimetype := index $info "mimetype"}}
+              {{$size := index $info "size"}}
+
+              <div class="attachment-item flex flex-column ">
+                <div class="fs-09 flex-one">
+                  <a href="{{$hms}}/_matrix/media/r0/download/{{$mxc}}">
+                    <span class="primary">{{index .Event.Content "body"}}</span>
+                  </a>
+                </div>
+                <div class="mt1 small o-90">
+                  {{$mimetype}} - {{FileSize $size}}
+                </div>
+              </div>
+
+          </div>
+
+      {{else if eq $msgtype "m.video"}}
+
+          <div class="video-item flex flex-column mv2">
+            {{$hms := .HomeServerURL}}
+
+              {{$mxc := StripMXCPrefix (index .Event.Content "url")}}
+              {{$info := index .Event.Content "info"}}
+              {{$mimetype := index $info "mimetype"}}
+              {{$size := index $info "size"}}
+                  {{$height := index $info "h"}}
+                  {{$width := index $info "w"}}
+
+
+              <div class="vi-c" style="padding-bottom: calc(({{$height}}/{{$width}})*100%);">
+                <figure class="video-container" data-fullscreen="false">
+                  <video controls>
+                    <source src="{{$hms}}/_matrix/media/r0/download/{{$mxc}}" 
+                      type="">
+                  </video>
+                </figure>
+              </div>
+
+          </div>
+
+
+
+      {{else if eq $msgtype "m.audio"}}
+
+          <div class="audio-item flex flex-column mv2">
+            {{$hms := .HomeServerURL}}
+
+              {{$mxc := StripMXCPrefix (index .Event.Content "url")}}
+
+              <audio controls>
+                  <source src="{{$hms}}/_matrix/media/r0/download/{{$mxc}}" 
+                  type="{{.Attachment.FileType}}">
+              </audio>
+
+          </div>
+
+      {{end}}
+
+      {{$mrg := false}}
+      {{$lnk := index .Event.Content "links"}}
+      {{$img := index .Event.Content "images"}}
+      {{$att := index .Event.Content "attachments"}}
+      {{if or $lnk $img $att}}{{$mrg = true}}{{end}}
+
+      {{if gt .Event.TotalReplies 0}}
+      <div class="{{if $mrg}}mt3{{end}}">
+          {{if .UserFeed}}
+          <a class="" href="/{{index .Event.Content "room_path"}}/{{index .Event.ID}}">
+          {{else}}
+          <a class="" href="/{{$evid}}">
+              {{end}}
+              {{$rep := "Reply"}}
+              {{if gt .Event.TotalReplies 1}}{{$rep = "Replies"}}{{end}}
+              <span class="small primary hov-un">{{.Event.TotalReplies}} {{$rep}}</span>
+          </a>
+      </div>
+      {{end}}
+
+      </div>
+{{$nsfw := index .Event.Content "nsfw"}}
+
+{{if and $nsfw (not .PermalinkedPost)}}
+    <div class="nsfw-mask gr-default nsfw brd-btm" 
+        id="nsfw-{{.Event.ShortID}}"
+        data-id="{{.Event.ShortID}}">
+        <div class="gr-center small">
+            NSFW. <span class="primary pointer hov-un">Click to View</span>
+        </div>
+    </div>
+{{end}}
+
+</div>
+
+      {{if or .Reply .NestedReply}}
+      <div class="flex reply-to-reply" data-id="{{.Event.ShortID}}">
+          <div class="flex-one"></div>
+          <div class="flex pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M6.78 1.97a.75.75 0 010 1.06L3.81 6h6.44A4.75 4.75 0 0115 10.75v2.5a.75.75 0 01-1.5 0v-2.5a3.25 3.25 0 00-3.25-3.25H3.81l2.97 2.97a.75.75 0 11-1.06 1.06L1.47 7.28a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0z"></path></svg>
+          </div>
+      </div>
+      {{end}}
+
+
+
+
+{{if and (not .Nested) (not .NestedReply)}}
+{{end}}
+
+</div>
+
+
+
+
+{{end}}

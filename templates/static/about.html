@@ -1,0 +1,45 @@
+{{define "about"}}
+<html>
+  <head>
+    <title>About - Hummingbard</title>
+    {{template "common-head" .}}
+  </head>
+  <body>
+    <div class="root">
+      {{template "header" Map "Page" . "Name" "login"}}
+
+      <div class="content-c create-room">
+        <div class="mt5 pa3">
+          <div class="lh-copy pi flex flex-column brd pa3">
+            <div class="">
+            Hummingbard is a decentralized community platform built on top of <a
+              href="https://matrix.org"><span class="primary">Matrix</span></a>.
+            </div>
+            <div class="mt3">
+              <ul>
+                <li>
+                  Every <i><strong>space</strong></i> on Hummingbard is a regular Matrix room. 
+                </li>
+                <li>
+                  Users can run their own instance of Hummingbard.
+                </li>
+                <li>
+                  Users on one server can join spaces on other servers.
+                </li>
+                <li>
+                  Users on one server can follow users on other servers.
+                </li>
+                <li>
+                  All data is replicated to all participating servers.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{template "state" .}}
+
+    </div>
+  </body>
+</html>
+{{end}}

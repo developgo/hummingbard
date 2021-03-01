@@ -1,0 +1,25 @@
+{{define "state"}}
+  <script nonce={{.Nonce}}>
+    let authenticated = false;
+    let identity;
+    {{if .LoggedInUser}}
+        authenticated = true
+        identity = {
+          user_id: {{.LoggedInUser.UserID}},
+          display_name: {{.LoggedInUser.DisplayName}},
+          avatar_url: {{.LoggedInUser.AvatarURL}},
+          matrix_access_token: {{.LoggedInUser.MatrixAccessToken}},
+          access_token: {{.LoggedInUser.AccessToken}},
+          device_id: {{.LoggedInUser.DeviceID}},
+          home_server: {{.LoggedInUser.HomeServer}},
+          well_known: {{.LoggedInUser.WellKnown}},
+          room_id: {{.LoggedInUser.RoomID}},
+          federated: {{.LoggedInUser.Federated}},
+          joined_rooms: {{.LoggedInUser.JoinedRooms}},
+        }
+    {{end}}
+  </script>
+  {{if .LoggedInUser}}
+      <script defer nonce={{.Nonce}} src="{{ InsertJS "userMenu" }}"></script>
+  {{end}}
+{{end}}

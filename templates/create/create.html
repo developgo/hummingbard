@@ -1,0 +1,23 @@
+{{define "create"}}
+<html>
+  <head>
+    <title>Hummingbard</title>
+    {{template "common-head" .}}
+  </head>
+  <body>
+    <div class="root">
+      {{template "header" Map "Page" . "Name" "login"}}
+
+      <div class="center-content create-room">
+        <div class="gr-center">
+          <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
+        </div>
+      </div>
+      {{template "state" .}}
+      {{template "footer" .}}
+      <script defer nonce={{.Nonce}} src="{{ InsertJS "createRoom" }}"></script>
+
+    </div>
+  </body>
+</html>
+{{end}}

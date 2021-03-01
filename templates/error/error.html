@@ -1,0 +1,24 @@
+{{define "error"}}
+<html>
+  <head>
+    <title>Error - Hummingbard</title>
+    {{template "common-head" .}}
+  </head>
+  <body>
+    <div class="root">
+      {{template "header" Map "Page" . "Name" "error"}}
+
+      <div class="center-content ">
+        <div class="gr-center flex flex-column">
+          <div class="mt3">
+            Catastrophic failure. :(
+          </div>
+        </div>
+      </div>
+      {{template "state" .}}
+      {{template "footer" .}}
+
+    </div>
+  </body>
+</html>
+{{end}}
